@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- JDBC Database connection settings для SQLite -->
+        <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
+        <property name="hibernate.connection.url">jdbc:sqlite:${catalina.home}/cloudmessenger.db</property>
+        
+        <!-- SQLite не поддерживает пулы соединений -->
+        <property name="hibernate.connection.pool_size">1</property>
+        
+        <!-- SQLite диалект из Maven-зависимости -->
+        <property name="hibernate.dialect">com.github.gwenn.sqlite.dialect.SQLiteDialect</property>
+        
+        <!-- Отключаем второй уровень кэша -->
+        <property name="hibernate.cache.use_second_level_cache">false</property>
+        
+        <!-- Вывод SQL-запросов в консоль -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+        
+        <!-- Автоматическое обновление схемы базы данных -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        
+        <!-- Сущности -->
+        <mapping class="com.cloudmessenger.model.User"/>
+        <mapping class="com.cloudmessenger.model.Contact"/>
+        <mapping class="com.cloudmessenger.model.Message"/>
+    </session-factory>
+</hibernate-configuration> 
