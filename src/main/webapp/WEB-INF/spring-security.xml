@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/security
+                           http://www.springframework.org/schema/security/spring-security.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Включаем сканирование компонентов для поиска кастомного AuthenticationProvider -->
+    <context:component-scan base-package="com.cloudmessenger.security" />
+
+    <!-- Настройка без аутентификации для статических ресурсов -->
+    <http pattern="/resources/**" security="none" />
+    <http pattern="/webjars/**" security="none" />
+    
+    <!-- Конфигурирование доступа -->
+    <http auto-config="true" use-expressions="true">
+        <intercept-url pattern="/login" access="permitAll" />
+        <intercept-url pattern="/register/**" access="permitAll" />
+        <intercept-url pattern="/api/text" access="permitAll" /> <!-- Для приема SMS -->
+        <intercept-url pattern="/admin/**" access="hasRole('ADMIN')" />
+        <intercept-url pattern="/**" access="hasRole('USER')" />
+        
+        <!-- Настройка формы входа -->
+        <form-login login-page="/login"
+                    login-processing-url="/authenticate"
+                    authentication-success-handler-ref="authenticationSuccessHandler"
+                    authentication-failure-url="/login?error=true"
+                    username-parameter="loginInput"
+                    password-parameter="password" />
+                    
+        <!-- Настройка выхода -->
+        <logout logout-url="/logout"
+                logout-success-url="/login?logout=true"
+                invalidate-session="true"
+                delete-cookies="JSESSIONID" />
+                
+        <!-- Защита от CSRF -->
+        <csrf />
+    </http>
+    
+    <!-- Настройка аутентификации -->
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="flexibleAuthenticationProvider" />
+    </authentication-manager>
+    
+    <!-- Bean-компоненты -->
+    <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+    
+    <!-- Кастомный обработчик успешной аутентификации -->
+    <beans:bean id="authenticationSuccessHandler" class="com.cloudmessenger.security.CustomAuthenticationSuccessHandler" />
+    
+    <!-- Источник данных для SQLite -->
+    <beans:bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <beans:property name="driverClassName" value="org.sqlite.JDBC" />
+        <beans:property name="url" value="jdbc:sqlite:${catalina.home}/cloudmessenger.db" />
+    </beans:bean>
+</beans:beans> 
